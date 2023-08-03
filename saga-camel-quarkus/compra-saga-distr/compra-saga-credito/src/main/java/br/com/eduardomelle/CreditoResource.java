@@ -4,8 +4,8 @@ import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 @Path("credito")
 public class CreditoResource {
@@ -16,25 +16,22 @@ public class CreditoResource {
   @Path("newPedidoValor")
   @GET
   @Produces(MediaType.TEXT_PLAIN)
-  public Response newPedidoValor(Long pedidoId, int valor) {
+  public void newPedidoValor(@QueryParam("pedidoId") Long pedidoId, @QueryParam("valor") int valor) {
     this.creditoService.newPedidoValor(pedidoId, valor);
-    return null;
   }
 
   @Path("cancelPedidoValor")
   @GET
   @Produces(MediaType.TEXT_PLAIN)
-  public Response cancelPedidoValor(Long id) {
+  public void cancelPedidoValor(@QueryParam("id") Long id) {
     this.creditoService.cancelPedidoValor(id);
-    return null;
   }
 
   @Path("getCreditoTotal")
   @GET
   @Produces(MediaType.TEXT_PLAIN)
-  public Response getCreditoTotal() {
-    int creditoTotal = this.creditoService.getCreditoTotal();
-    return null;
+  public int getCreditoTotal() {
+    return this.creditoService.getCreditoTotal();
   }
 
 }
