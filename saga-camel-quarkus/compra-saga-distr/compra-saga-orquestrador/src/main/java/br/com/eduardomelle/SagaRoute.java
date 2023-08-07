@@ -8,14 +8,17 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.SagaPropagation;
 import org.apache.camel.saga.CamelSagaService;
 import org.apache.camel.saga.InMemorySagaService;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 @ApplicationScoped
 public class SagaRoute extends RouteBuilder {
 
     @Inject
+    @RestClient
     PedidoService pedidoService;
 
     @Inject
+    @RestClient
     CreditoService creditoService;
 
     @Override
@@ -24,35 +27,35 @@ public class SagaRoute extends RouteBuilder {
         getContext().addService(sagaService);
 
         // Saga:
-        from("direct:saga").saga().propagation(SagaPropagation.REQUIRES_NEW).log("Iniciando a transação")
+        from("direct:saga").messageHistory().saga().propagation(SagaPropagation.REQUIRES_NEW).log("Iniciando a transação")
                 .to("direct:newPedido").log("Criando novo pedido com id ${header.id}")
                 .to("direct:newPedidoValor").log("Reservando o crédito")
                 .to("direct:finaliza").log("Feito!");
 
         // Pedido Service:
-        from("direct:newPedido").saga().propagation(SagaPropagation.MANDATORY)
+        from("direct:newPedido").messageHistory().saga().propagation(SagaPropagation.MANDATORY)
                 .compensation("direct:cancelPedido")
                 .transform().header(Exchange.SAGA_LONG_RUNNING_ACTION)
                 .bean(pedidoService, "newPedido").log("Pedido ${body} criado");
 
         from("direct:cancelPedido")
-                .transform().header(Exchange.SAGA_LONG_RUNNING_ACTION)
+                .messageHistory().transform().header(Exchange.SAGA_LONG_RUNNING_ACTION)
                 .bean(pedidoService, "cancelPedido").log("Pedido ${body} cancelado");
 
         // Crédito Service:
-        from("direct:newPedidoValor").saga().propagation(SagaPropagation.MANDATORY)
+        from("direct:newPedidoValor").messageHistory().saga().propagation(SagaPropagation.MANDATORY)
                 .compensation("direct:cancelPedidoValor")
                 .transform().header(Exchange.SAGA_LONG_RUNNING_ACTION)
                 .bean(creditoService, "newPedidoValor")
                 .log("Crédito do pedido ${header.pedidoId} no valor de ${header.valor} reservado para a saga ${body}");
 
         from("direct:cancelPedidoValor")
-                .transform().header(Exchange.SAGA_LONG_RUNNING_ACTION)
+                .messageHistory().transform().header(Exchange.SAGA_LONG_RUNNING_ACTION)
                 .bean(creditoService, "cancelPedidoValor")
                 .log("Crédito do pedido ${header.pedidoId} no valor de ${header.valor} cancelado para a saga ${body}");
 
         // Finaliza:
-        from("direct:finaliza").saga().propagation(SagaPropagation.MANDATORY)
+        from("direct:finaliza").messageHistory().saga().propagation(SagaPropagation.MANDATORY)
                 .choice().end();
     }
 

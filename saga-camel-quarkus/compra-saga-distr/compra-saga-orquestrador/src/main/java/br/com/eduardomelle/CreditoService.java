@@ -1,38 +1,32 @@
 package br.com.eduardomelle;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.camel.Header;
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 
-import org.apache.camel.Header;
-
+@RegisterRestClient(baseUri = "http://compra-saga-credito-eduardomelle-dev.apps.sandbox-m2.ll9k.p1.openshiftapps.com/credito")
 @ApplicationScoped
-public class CreditoService {
+public interface CreditoService {
 
-  private int creditoTotal;
+  @GET
+  @Path("newPedidoValor")
+  @Produces(MediaType.TEXT_PLAIN)
+  public void newPedidoValor(@QueryParam("pedidoId") @Header("pedidoId") Long pedidoId, @QueryParam("valor") @Header("valor") int valor);
 
-  private Map<Long, Integer> pedido_valor = new HashMap<>();
+  @GET
+  @Path("cancelPedidoValor")
+  @Produces(MediaType.TEXT_PLAIN)
+  public void cancelPedidoValor(@QueryParam("id") @Header("id") Long id);
 
-  public CreditoService() {
-    this.creditoTotal = 100;
-  }
-
-  public void newPedidoValor(@Header("pedidoId") Long pedidoId, @Header("valor") int valor) {
-    if (valor > creditoTotal) {
-      throw new IllegalStateException("Saldo insuficiente.");
-    }
-
-    creditoTotal = creditoTotal - valor;
-    pedido_valor.put(pedidoId, valor);
-  }
-
-  public void cancelPedidoValor(@Header("id") Long id) {
-    System.out.println("PedidoValor falhou. Iniciando cancelamento do pedido.");
-  }
-
-  public int getCreditoTotal() {
-    return creditoTotal;
-  }
+  @GET
+  @Path("getCreditoTotal")
+  @Produces(MediaType.TEXT_PLAIN)
+  public int getCreditoTotal();
 
 }

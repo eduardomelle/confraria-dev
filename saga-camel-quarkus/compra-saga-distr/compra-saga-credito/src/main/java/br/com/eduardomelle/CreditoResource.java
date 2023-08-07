@@ -6,6 +6,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 @Path("credito")
 public class CreditoResource {
@@ -16,8 +17,13 @@ public class CreditoResource {
   @Path("newPedidoValor")
   @GET
   @Produces(MediaType.TEXT_PLAIN)
-  public void newPedidoValor(@QueryParam("pedidoId") Long pedidoId, @QueryParam("valor") int valor) {
-    this.creditoService.newPedidoValor(pedidoId, valor);
+  public Response newPedidoValor(@QueryParam("pedidoId") Long pedidoId, @QueryParam("valor") int valor) {
+    try {
+      this.creditoService.newPedidoValor(pedidoId, valor);
+      return Response.ok().build();
+    } catch (IllegalStateException e) {
+      return Response.status(Response.Status.NOT_ACCEPTABLE).entity(e.getMessage()).build();
+    }
   }
 
   @Path("cancelPedidoValor")
