@@ -1,7 +1,7 @@
 apiVersion: apps/v1
-kind: ReplicaSet
+kind: Deployment
 metadata:
-  name: demo-quarkus-rs
+  name: demo-quarkus-deploy
 spec:
   replicas: 1
   selector:
@@ -16,3 +16,10 @@ spec:
       containers:
         - name: demo-quarkus
           image: eduardomelle/demo-quarkus:1.0-SNAPSHOT
+          imagePullPolicy: Always
+          #resources:
+          #limits:
+          #memory: "128Mi"
+          #cpu: "500m"
+          ports:
+            - containerPort: 8080
