@@ -17,9 +17,12 @@ spec:
         - name: demo-quarkus
           image: eduardomelle/demo-quarkus:1.0-SNAPSHOT
           imagePullPolicy: Always
-          #resources:
-          #limits:
-          #memory: "128Mi"
-          #cpu: "500m"
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "250m" # 1/4 cores
+            limits:
+              memory: "200Mi"
+              cpu: "500m" # 1/2 cores
           ports:
             - containerPort: 8080
